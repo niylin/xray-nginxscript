@@ -1,4 +1,11 @@
-# xray-nginxs
+# xray-nginx
+<div>
+  <button class="btn" data-clipboard-target="#code">Copy</button>
+  <pre><code id="code" class="language-python">
+  # wget dfvbfdabv
+  print("Hello, World!")
+  </code></pre>
+</div>
 
 xray一键安装脚本,nginx前置ws+tls,
 vless+ws+tls
