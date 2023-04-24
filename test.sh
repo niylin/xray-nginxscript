@@ -35,14 +35,10 @@ then
    systemctl stop nginx
    pkill -9 nginx
    apt purge -y nginx
-   apt install -y nginx
 fi
 
 # 安装 ufw
-apt install -y curl
-apt install -y git
-apt install -y lsof
-apt install -y ufw
+apt install -y curl unzip lsof git ufw nginx
 
 # 设置默认规则
 ufw default deny incoming
@@ -162,18 +158,25 @@ while true; do
     read -p "请输入选项编号[1/2/3/4]：" option
     case $option in
         1)
-            git clone https://github.com/niylin/shipin1.git /home/www/shipin1
+            mkdir -p /home/www
+            wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/shipin1.zip -O /home/www/shipin1.zip
+            unzip /home/www/shipin1.zip -d /home/www
             sed -i "s|root  /home/www/shipin1;|root  /home/www/shipin1;|" /etc/nginx/sites-enabled/$domain_name.conf
             break
             ;;
         2)
-            git clone https://github.com/HFIProgramming/mikutap.git /home/www/mikutap
+            mkdir -p /home/www
+            wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/mikutap.zip -O /home/www/mikutap.zip
+            unzip /home/www/mikutap.zip -d /home/www
+
             sed -i "s|root  /home/www/shipin1;|root  /home/www/mikutap;|" /etc/nginx/sites-enabled/$domain_name.conf
             break
             ;;
         3)
-            git clone https://github.com/niylin/wenjian.git /home/www/wenjian
-            sed -i "s|root  /home/www/shipin1;|root  /home/www/wenjian;|" /etc/nginx/sites-enabled/$domain_name.conf
+            mkdir -p /home/www
+            wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/zhuanhuan.zip -O /home/www/zhuanhuan.zip
+            unzip /home/www/zhuanhuan.zip -d /home/www
+            sed -i "s|root  /home/www/shipin1;|root  /home/www/zhuanhuan;|" /etc/nginx/sites-enabled/$domain_name.conf
             break
             ;;
         4)
