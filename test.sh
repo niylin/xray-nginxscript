@@ -62,31 +62,90 @@ read -p "请输入您的 Cloudflare 邮件地址: " email
 # 安装 acme.sh
 curl https://get.acme.sh | sh -s email=$email
 
+export CF_Key="$api_key"
+export CF_Email="$email"
+
 # 创建 acme.sh 命令别名
 echo 'alias acme.sh=~/.acme.sh/acme.sh' >> ~/.bashrc
 
 # 重新加载 .bashrc 文件
 source ~/.bashrc
 
-export CF_Key="$api_key"
-export CF_Email="$email"
-            
 # 使用 Cloudflare API 请求 SSL 证书
+mkdir -p /home/cert
 ~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain_name -d "*.$domain_name"
-
 ~/.acme.sh/acme.sh --install-cert -d $domain_name \
-    --key-file /home/cert.key \
-    --fullchain-file /home/cert.crt
+    --key-file /home/cert/$domain_name.key \
+    --fullchain-file /home/cert/$domain_name.crt
+
+#自动添加解析
+echo "请选择要解析的IP地址类型："
+echo "[1] IPv6"
+echo "[2] IPv4"
+read -p "请输入选项数字: " ip_type_choice
+
+if [ "$ip_type_choice" != "1" ] && [ "$ip_type_choice" != "2" ]; then
+    echo "无效的选项，跳过添加 DNS 解析记录。"
+else
+    if [ $ip_type_choice -eq 1 ]; then
+        # 如果选择IPv6，则获取本机IPv6地址
+        ip_address=$(ip -6 addr show | grep inet6 | grep -v fe80 | awk '{if($2!="::1/128") print $2}' | cut -d"/" -f1 | head -n 1)
+        record_type="AAAA"
+    elif [ $ip_type_choice -eq 2 ]; then
+        # 如果选择IPv4，则获取本机IPv4地址
+        ip_address=$(ip -4 addr show | grep inet | grep -v '127.0.0.1' | awk '{print $2}' | cut -d "/" -f1 | head -n 1)
+        record_type="A"
+    fi
+
+    # 获取 Zone ID
+    zone_name=$(echo "${domain_name}" | awk -F '.' '{print $(NF-1)"."$NF}')
+    if [ -z "$zone_name" ]; then
+        echo "无效的域名提供，跳过添加 DNS 解析记录。"
+    else
+	zone_id=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=${zone_name}" \
+		-H "X-Auth-Email: ${CF_Email}" \
+		-H "X-Auth-Key: ${CF_Key}" \
+		-H "Content-Type: application/json" | grep -oP '(?<="id":")[^"]*' | head -n1)
+
+        if [ -z "$zone_id" ]; then
+            echo "无法获取域名 $domain_name 的区域 ID，跳过添加 DNS 解析记录。"
+        else
+            echo "您的区域 ID 为：$zone_id"
+
+            echo "请选择 CDN 加速："
+            echo "[1] 开启"
+            echo "[2] 不开启"
+            read -p "请输入选项数字: " cdn_choice
+
+            if [ "$cdn_choice" == "1" ]; then
+               cdn=true
+            else
+            cdn=false
+            fi
+            # 添加解析记录
+            if curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+              -H "X-Auth-Email: $CF_Email" \
+              -H "X-Auth-Key: $CF_Key" \
+              -H "Content-Type: application/json" \
+              --data "{\"type\":\"$record_type\",\"name\":\"$domain_name\",\"content\":\"$ip_address\",\"ttl\":1,\"proxied\":$cdn}" > /dev/null; then
+		      echo "域名解析成功！"
+			  else
+			  echo "域名解析失败,尝试手动添加。"
+			fi
+        fi
+    fi
+fi
 
 # 生成 UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
 
+# 创建 nginx 配置文件
 cat <<EOF > /etc/nginx/sites-enabled/$domain_name.conf
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    ssl_certificate       /home/cert.crt;
-    ssl_certificate_key   /home/cert.key;
+    ssl_certificate /home/cert/$domain_name.crt;
+    ssl_certificate_key /home/cert/$domain_name.key;
     ssl_protocols         TLSv1.3;
     ssl_ecdh_curve        X25519:P-256:P-384:P-521;
     server_name           $domain_name;
@@ -101,7 +160,7 @@ server {
 
     location /$uuid-vm {
         proxy_redirect off;
-        proxy_pass http://127.0.0.1:10000;
+        proxy_pass http://127.0.0.1:10001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection upgrade;
@@ -112,7 +171,7 @@ server {
 
     location /$uuid-vl {
         proxy_redirect off;
-        proxy_pass http://127.0.0.1:20000;
+        proxy_pass http://127.0.0.1:10002;
         proxy_http_version 1.1;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -125,7 +184,7 @@ server {
     
     location /$uuid-tr {
         proxy_redirect off;
-        proxy_pass http://127.0.0.1:30000;
+        proxy_pass http://127.0.0.1:10003;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection upgrade;
@@ -136,7 +195,7 @@ server {
     
     location /$uuid-ss {
         proxy_redirect off;
-        proxy_pass http://127.0.0.1:40000;
+        proxy_pass http://127.0.0.1:10004;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection upgrade;
@@ -200,7 +259,7 @@ cat <<EOF > /usr/local/etc/xray/config.json
 {
     "inbounds":[
         {
-            "port":10000,
+            "port":10001,
             "listen":"127.0.0.1",
             "protocol":"vmess",
             "settings":{
@@ -228,7 +287,7 @@ cat <<EOF > /usr/local/etc/xray/config.json
             }
         },
         {
-            "port":20000,
+            "port":10002,
             "listen":"127.0.0.1",
             "protocol":"vless",
             "settings": {
@@ -259,7 +318,7 @@ cat <<EOF > /usr/local/etc/xray/config.json
                        }
         },
         {
-            "port":30000,
+            "port":10003,
             "listen":"127.0.0.1",
             "protocol":"trojan",
             "settings":{
@@ -287,7 +346,7 @@ cat <<EOF > /usr/local/etc/xray/config.json
             }
         },
         {
-            "port":40000,
+            "port":10004,
             "listen":"127.0.0.1",
             "protocol":"shadowsocks",
             "settings":{
@@ -325,9 +384,12 @@ cat <<EOF > /usr/local/etc/xray/config.json
 EOF
 
 # 重启 xray 和 nginx
+ufw reload
 systemctl restart xray
 systemctl restart nginx
-nginx -s reload
+
+# 生成 VMESS over WebSocket 的链接
+VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"vmess","add":"'$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
 
 # 生成 VLESS over WebSocket 的链接
 VLESS_LINK="vless://$uuid@$domain_name:443?encryption=none&security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-vl"
@@ -335,30 +397,40 @@ VLESS_LINK="vless://$uuid@$domain_name:443?encryption=none&security=tls&sni=$dom
 # 生成 Trojan over WebSocket 的链接
 TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-tr"
 
+# 生成 Shadowsocks 的链接
+Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@${domain_name}:443" | base64 -w 0)
+
 # 输出链接
+echo  "$VMESS_LINK" > /root/link.conf
 echo  "$VLESS_LINK" > /root/link.conf
-echo  "" >> /root/link.conf
 echo  "$TROJAN_LINK" >> /root/link.conf
-echo  "" >> /root/link.conf
+echo  "ss://${Shadowsocks_LINK}#shadowsocks" >> /root/link.conf
+echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
 echo  "uuid=$uuid" >> /root/link.conf
-echo  "server=$domain_name:443" >> /root/link.conf
-echo  "vmesspath=/$uuid-vm" >> /root/link.conf
-echo  "shadowsockspath=/$uuid-ss" >> /root/link.conf
+echo  "server=sni=host=$domain_name" >> /root/link.conf
+echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 echo  "此配置保存在/root/link.conf" >> /root/link.conf
 
 # 输出链接
+echo  "$VMESS_LINK"
 echo  "$VLESS_LINK"
-echo  ""
 echo  "$TROJAN_LINK"
-echo  ""
+echo  "ss://${Shadowsocks_LINK}#shadowsocks"
+echo  "Shadowsocks需要手动添加tls信息"
 echo  "uuid=$uuid"
-echo  "server=$domain_name:443"
-echo  "vmesspath=/$uuid-vm"
-echo  "shadowsockspath=/$uuid-ss"
+echo  "server=sni=host=$domain_name"
+echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
 echo  "此配置保存在/root/link.conf"
-echo  "脚本会自动开启80,443,22端口,安装curl,git,lsof,ufw"
+echo  "脚本会自动开启80,443,22端口,安装curl,git,lsof,ufw,unzip"
+echo "###########################################################"
+echo "###########################################################"
+echo "###########################################################"
+echo "如果访问伪装页面失败,尝试使用以下命令手动重启ufw及nginx"
+echo "重启ufw:    ufw reload"
+echo "重启nginx:  systemctl restart nginx"
+echo "重启xray:   systemctl restart xray"
 echo "           ,     ,\n";
 echo "           (\\____/)\n";
 echo "            (_oo_)\n";
@@ -368,4 +440,3 @@ echo "         []/______\\[] /\n";
 echo "         / \\______/ \\/\n";
 echo "        /    /__\\\n";
 echo "       (\\   /____\\\n";
-
