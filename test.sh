@@ -401,10 +401,14 @@ TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=
 Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@${domain_name}:443" | base64 -w 0)
 
 # 输出链接
-echo  "$VMESS_LINK" > /root/link.conf
-echo  "$VLESS_LINK" > /root/link.conf
+echo "------------------------------------------------------" > /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo  "$VMESS_LINK" >> /root/link.conf
+echo  "$VLESS_LINK" >> /root/link.conf
 echo  "$TROJAN_LINK" >> /root/link.conf
 echo  "ss://${Shadowsocks_LINK}#shadowsocks" >> /root/link.conf
+echo "######################################################" >> /root/link.conf
+echo "######################################################" >> /root/link.conf
 echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
 echo  "uuid=$uuid" >> /root/link.conf
 echo  "server=sni=host=$domain_name" >> /root/link.conf
@@ -413,10 +417,14 @@ echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link
 echo  "此配置保存在/root/link.conf" >> /root/link.conf
 
 # 输出链接
+echo "------------------------------------------------------"
+echo "------------------------------------------------------"
 echo  "$VMESS_LINK"
 echo  "$VLESS_LINK"
 echo  "$TROJAN_LINK"
 echo  "ss://${Shadowsocks_LINK}#shadowsocks"
+echo "------------------------------------------------------"
+echo "------------------------------------------------------"
 echo  "Shadowsocks需要手动添加tls信息"
 echo  "uuid=$uuid"
 echo  "server=sni=host=$domain_name"
@@ -431,12 +439,12 @@ echo "如果访问伪装页面失败,尝试使用以下命令手动重启ufw及n
 echo "重启ufw:    ufw reload"
 echo "重启nginx:  systemctl restart nginx"
 echo "重启xray:   systemctl restart xray"
-echo "           ,     ,\n";
-echo "           (\\____/)\n";
-echo "            (_oo_)\n";
-echo "              (O)\n";
-echo "            __||__    \\)\n";
-echo "         []/______\\[] /\n";
-echo "         / \\______/ \\/\n";
-echo "        /    /__\\\n";
-echo "       (\\   /____\\\n";
+echo "           ,     ,\n"
+echo "           (\\____/)\n"
+echo "            (_oo_)\n"
+echo "              (O)\n"
+echo "            __||__    \\)\n"
+echo "         []/______\\[] /\n"
+echo "         / \\______/ \\/\n"
+echo "        /    /__\\\n"
+echo "       (\\   /____\\\n"
