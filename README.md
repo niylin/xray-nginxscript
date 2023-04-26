@@ -19,7 +19,8 @@
 <br>vmess+ws+tls  
 <br>Trojan+ws+tls  
 <br>shadowsocks+ws+tls  
-# 自动解析
+<br>
+<br># 自动解析
 <br>通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.自动解析不支持eu.org等免费域名
 <br>四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
 <br>输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书 
