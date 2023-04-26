@@ -1,4 +1,5 @@
-# xray-nginx
+# xray-nginx  
+------------------------------------------------------------------------------------------------------------------------
 仅支持Ubuntu和debian,其他系统请自行修改
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
@@ -13,18 +14,18 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
   </code></pre>
 </div>
-## xray一键安装脚本,nginx前置 
-###<br>此脚本会卸载apache2和重装nginx.如不想卸载,请及时选n,5秒确认时间  
-<br>vless+ws+tls  
-<br>vmess+ws+tls  
-<br>Trojan+ws+tls  
-<br>shadowsocks+ws+tls  
-<br>
-<br><font size="6">自动解析</font>
-<br>通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.自动解析不支持eu.org等免费域名
-<br>四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
-<br>输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书 
-
+## xray一键安装脚本,nginx前置  
+此脚本会卸载apache2和重装nginx.如不想卸载,请及时选n,5秒确认时间  
+vless+ws+tls  
+vmess+ws+tls  
+Trojan+ws+tls  
+shadowsocks+ws+tls  
+  
+### 自动解析  
+通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.自动解析不支持eu.org等免费域名  
+四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
+输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书  
+  
 修改个人信息,以减少输入内容,请更改以下内容
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
