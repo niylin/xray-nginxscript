@@ -27,7 +27,7 @@ shadowsocks+ws+tls
 四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
 输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书  
   
-修改个人信息,以减少输入内容,请更改以下内容
+#### 修改个人信息,以减少输入内容,请更改以下内容  
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
