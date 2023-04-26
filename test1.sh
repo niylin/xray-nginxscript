@@ -35,6 +35,7 @@ if [ -f /etc/debian_version ]; then
     apt-get update
     apt-get install -y curl unzip lsof git ufw nginx
 elif [ -f /etc/redhat-release ]; then
+    yum install epel-release
     yum clean all
     yum makecache
     yum install -y curl unzip lsof git ufw nginx
