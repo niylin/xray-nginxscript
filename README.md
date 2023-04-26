@@ -1,14 +1,14 @@
 # xray-nginx
 仅支持Ubuntu和debian,其他系统请自行修改
 <div>
-  <button class="btn" data-clipboard-target="#code">仅支持Ubuntu和debian,其他系统请自行修改</button>
+  <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
 未经过测试的版本,添加了centos7支持
 <div>
-  <button class="btn" data-clipboard-target="#code">未经过测试的版本,添加了centos7支持</button>
+  <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
   </code></pre>
