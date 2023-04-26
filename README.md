@@ -6,7 +6,13 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
-
+未经过测试的版本,添加了centos7支持
+<div>
+  <button class="btn" data-clipboard-target="#code">Copy</button>
+  <pre><code id="code" class="language-python">
+  wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
+  </code></pre>
+</div>
 xray一键安装脚本,nginx前置ws+tls,  
 此脚本会卸载apache2和重装nginx.如不想卸载,请及时选n,5秒确认时间  
 vless+ws+tls  
