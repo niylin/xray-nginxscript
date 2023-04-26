@@ -32,7 +32,7 @@ fi
 
 # 安装必要的软件包
 if [ -f /etc/debian_version ]; then
-    apt-get update -n
+    apt-get update
     apt-get install -y curl unzip lsof git ufw nginx
 elif [ -f /etc/redhat-release ]; then
     yum update -n
