@@ -13,8 +13,8 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
   </code></pre>
 </div>
-## xray一键安装脚本,nginx前置
-<br>此脚本会卸载apache2和重装nginx.如不想卸载,请及时选n,5秒确认时间  
+## xray一键安装脚本,nginx前置 
+###<br>此脚本会卸载apache2和重装nginx.如不想卸载,请及时选n,5秒确认时间  
 <br>vless+ws+tls  
 <br>vmess+ws+tls  
 <br>Trojan+ws+tls  
