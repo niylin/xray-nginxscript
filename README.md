@@ -1,14 +1,14 @@
 # xray-nginx
 仅支持Ubuntu和debian,其他系统请自行修改
 <div>
-  <button class="btn" data-clipboard-target="#code"></button>
+  <button class="btn" data-clipboard-target="#code">仅支持Ubuntu和debian,其他系统请自行修改</button>
   <pre><code id="code" class="language-python">
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
 未经过测试的版本,添加了centos7支持
 <div>
-  <button class="btn" data-clipboard-target="#code"></button>
+  <button class="btn" data-clipboard-target="#code">未经过测试的版本,添加了centos7支持</button>
   <pre><code id="code" class="language-python">
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
   </code></pre>
@@ -26,7 +26,7 @@ shadowsocks+ws+tls
 
 修改个人信息,以减少输入内容,请更改以下内容
 <div>
-  <button class="btn" data-clipboard-target="#code">Copy</button>
+  <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
     删除以下行
     59 #read -p "请输入您的 Cloudflare API 密钥: " api_key
@@ -34,7 +34,7 @@ shadowsocks+ws+tls
 </code></pre>
 </div>
 <div>
-  <button class="btn" data-clipboard-target="#code">Copy</button>
+  <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
     修改"cfapi"和"email"为自己的即可
     65 #export CF_Key="cfapi"
