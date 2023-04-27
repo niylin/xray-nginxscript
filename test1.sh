@@ -238,6 +238,10 @@ while true; do
         4)
             curl -fsSL "https://alist.nn.ci/v3.sh" | bash -s install
             sed -i "s|aaaaidddddaa125647|location / {\n        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto \$scheme;\n        proxy_set_header Host \$http_host;\n        proxy_set_header X-Real-IP \$remote_addr;\n        proxy_set_header Range \$http_range;\n        proxy_set_header If-Range \$http_if_range;\n        proxy_redirect off;\n        proxy_pass http://127.0.0.1:5244;\n        client_max_body_size 20000m;\n\t}|" /etc/nginx/conf.d/$domain_name.conf
+# 为alist添加虚拟驱动
+            wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/data.tar.gz -P /opt/alist
+            tar -xzf /opt/alist/data.tar.gz -C /opt/alist/data --strip-components=3 --overwrite
+            systemctl restart alist
             break
             ;;
         *)
@@ -411,6 +415,7 @@ echo  "uuid=$uuid" >> /root/link.conf
 echo  "server=sni=host=$domain_name" >> /root/link.conf
 echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
+echo  "alist会自动配置虚拟驱动,默认用户名:admin 密码:guest1548pppppfddf 如重置删除/opt/alist/data目录即可" >> /root/link.conf
 echo  "此配置保存在/root/link.conf" >> /root/link.conf
 
 # 输出链接
@@ -427,6 +432,7 @@ echo  "uuid=$uuid"
 echo  "server=sni=host=$domain_name"
 echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
+echo  "alist会自动配置虚拟驱动,默认用户名:admin 密码:guest1548pppppfddf 如重置删除/opt/alist/data目录即可"
 echo  "此配置保存在/root/link.conf"
 echo  "脚本会自动开启80,443,22端口,安装curl unzip lsof git ufw nginx"
 echo "###########################################################"
