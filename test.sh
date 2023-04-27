@@ -140,7 +140,7 @@ fi
 uuid=$(cat /proc/sys/kernel/random/uuid)
 
 # 创建 nginx 配置文件
-cat <<EOF > /etc/nginx/sites-enabled/$domain_name.conf
+cat <<EOF > /etc/nginx/conf.d/$domain_name.conf
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
@@ -220,7 +220,7 @@ while true; do
             mkdir -p /home/www
             wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/shipin1.zip -O /home/www/shipin1.zip
             unzip /home/www/shipin1.zip -d /home/www
-            sed -i "s|root  /home/www/shipin1;|root  /home/www/shipin1;|" /etc/nginx/sites-enabled/$domain_name.conf
+            sed -i "s|root  /home/www/shipin1;|root  /home/www/shipin1;|" /etc/nginx/conf.d/$domain_name.conf
             break
             ;;
         2)
@@ -228,19 +228,19 @@ while true; do
             wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/mikutap.zip -O /home/www/mikutap.zip
             unzip /home/www/mikutap.zip -d /home/www
 
-            sed -i "s|root  /home/www/shipin1;|root  /home/www/mikutap;|" /etc/nginx/sites-enabled/$domain_name.conf
+            sed -i "s|root  /home/www/shipin1;|root  /home/www/mikutap;|" /etc/nginx/conf.d/$domain_name.conf
             break
             ;;
         3)
             mkdir -p /home/www
             wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/zhuanhuan.zip -O /home/www/zhuanhuan.zip
             unzip /home/www/zhuanhuan.zip -d /home/www
-            sed -i "s|root  /home/www/shipin1;|root  /home/www/zhuanhuan;|" /etc/nginx/sites-enabled/$domain_name.conf
+            sed -i "s|root  /home/www/shipin1;|root  /home/www/zhuanhuan;|" /etc/nginx/conf.d/$domain_name.conf
             break
             ;;
         4)
             curl -fsSL "https://alist.nn.ci/v3.sh" | bash -s install
-            sed -i "s|aaaaidddddaa125647|location / {\n        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto \$scheme;\n        proxy_set_header Host \$http_host;\n        proxy_set_header X-Real-IP \$remote_addr;\n        proxy_set_header Range \$http_range;\n        proxy_set_header If-Range \$http_if_range;\n        proxy_redirect off;\n        proxy_pass http://127.0.0.1:5244;\n        client_max_body_size 20000m;\n\t}|" /etc/nginx/sites-enabled/$domain_name.conf
+            sed -i "s|aaaaidddddaa125647|location / {\n        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto \$scheme;\n        proxy_set_header Host \$http_host;\n        proxy_set_header X-Real-IP \$remote_addr;\n        proxy_set_header Range \$http_range;\n        proxy_set_header If-Range \$http_if_range;\n        proxy_redirect off;\n        proxy_pass http://127.0.0.1:5244;\n        client_max_body_size 20000m;\n\t}|" /etc/nginx/conf.d/$domain_name.conf
 # 为alist添加虚拟驱动
 wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/data.tar.gz -P /opt/alist
             tar -xzf /opt/alist/data.tar.gz -C /opt/alist/data --strip-components=3 --overwrite
@@ -253,7 +253,7 @@ wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/data.tar.g
     esac
 done
 
-sed -i 's|aaaaidddddaa125647||g' /etc/nginx/sites-enabled/$domain_name.conf
+sed -i 's|aaaaidddddaa125647||g' /etc/nginx/conf.d/$domain_name.conf
 
 # 安装 xray
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
