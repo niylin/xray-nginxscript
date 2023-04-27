@@ -27,7 +27,11 @@ shadowsocks+ws+tls
 ### 自动解析  
 通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.自动解析不支持eu.org等免费域名  
 输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书  
-========================================================================================================================   
+  
+####  
+证书/home/cert  
+站点/home/www  
+xray配置文件/usr/local/etc/xray
 #### 修改个人信息,以减少输入内容,请更改以下内容  
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
