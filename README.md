@@ -24,7 +24,10 @@ shadowsocks+ws+tls
 ####  
 证书/home/cert  
 站点/home/www  
-xray配置文件/usr/local/etc/xray
+xray配置文件/usr/local/etc/xray  
+  
+##### 不申请证书,跳过api环节即可  
+
 #### 修改个人信息,以减少输入内容,请更改以下内容  
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
