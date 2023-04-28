@@ -26,7 +26,7 @@ shadowsocks+ws+tls
 站点/home/www  
 xray配置文件/usr/local/etc/xray  
   
-##### 不申请证书,跳过api环节即可  
+##### 使用其他证书,跳过api环节,修改nginx配置即可  
 
 #### 修改个人信息,以减少输入内容,请更改以下内容  
 <div>
