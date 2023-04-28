@@ -1,6 +1,6 @@
 # xray-nginx  
 ------------------------------------------------------------------------------------------------------------------------
-仅支持Ubuntu和debian,其他系统请自行修改
+支持系统 Ubuntu,debian,centos7
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
