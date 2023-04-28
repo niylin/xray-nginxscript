@@ -390,13 +390,13 @@ systemctl restart xray
 systemctl restart nginx
 
 # 生成 VMESS over WebSocket 的链接
-VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"vmess","add":"'$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
+VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"-vmess","add":"'$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
 
 # 生成 VLESS over WebSocket 的链接
-VLESS_LINK="vless://$uuid@$domain_name:443?encryption=none&security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-vl"
+VLESS_LINK="vless://$uuid@$domain_name:443?encryption=none&security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-vl#-vless"
 
 # 生成 Trojan over WebSocket 的链接
-TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-tr"
+TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-tr#-trojan"
 
 # 生成 Shadowsocks 的链接
 Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@${domain_name}:443" | base64 -w 0)
@@ -407,7 +407,7 @@ echo "------------------------------------------------------" >> /root/link.conf
 echo  "$VMESS_LINK" >> /root/link.conf
 echo  "$VLESS_LINK" >> /root/link.conf
 echo  "$TROJAN_LINK" >> /root/link.conf
-echo  "ss://${Shadowsocks_LINK}#shadowsocks" >> /root/link.conf
+echo  "ss://${Shadowsocks_LINK}#-shadowsocks" >> /root/link.conf
 echo "######################################################" >> /root/link.conf
 echo "######################################################" >> /root/link.conf
 echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
@@ -424,7 +424,7 @@ echo "------------------------------------------------------"
 echo  "$VMESS_LINK"
 echo  "$VLESS_LINK"
 echo  "$TROJAN_LINK"
-echo  "ss://${Shadowsocks_LINK}#shadowsocks"
+echo  "ss://${Shadowsocks_LINK}#-shadowsocks"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
 echo  "Shadowsocks需要手动添加tls信息"
