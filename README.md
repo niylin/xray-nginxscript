@@ -1,6 +1,6 @@
 # xray-nginx  
 ------------------------------------------------------------------------------------------------------------------------
-支持系统 Ubuntu,debian,centos7
+支持系统 Ubuntu,debian,centos7.自动解析不支持eu.org等域名
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
@@ -31,13 +31,13 @@ shadowsocks+ws+tls
 四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
  
 ### 自动解析  
-通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.eu.org等免费域名需要手动解析  
+通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.  
 输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书  
   
 ####  
-证书/home/cert  
-站点/home/www  
-xray配置文件/usr/local/etc/xray  
+xray安装目录/home/xray  
+证书保存目录/home/cert  
+伪装站点目录/home/www  
   
 ##### 使用其他证书,跳过api环节,修改nginx配置即可  
 
