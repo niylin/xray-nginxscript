@@ -1,3 +1,13 @@
+# 安装必要的软件包
+if [ -f /etc/debian_version ]; then
+    apt-get update
+    apt-get install -y curl jq
+elif [ -f /etc/redhat-release ]; then
+    yum install epel-release
+    yum clean all
+    yum makecache
+    yum install -y curl jq
+fi
 # 获取用户输入的域名
 read -p "请输入您的域名： " domain_name
 
