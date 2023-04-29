@@ -7,7 +7,7 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
-自动解析支持所有域名,centos报错
+自动解析支持所有域名,centos未测试
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
