@@ -144,7 +144,7 @@ else
 			  echo "域名解析失败,尝试手动添加。"
 			fi
      fi
-    fi
+
 
 # 生成 UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
