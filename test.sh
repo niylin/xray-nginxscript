@@ -253,10 +253,15 @@ done
 sed -i 's|aaaaidddddaa125647||g' /etc/nginx/conf.d/$domain_name.conf
 
 # 安装 xray
-bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+# bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+
+   echo "安装xray..."
+	mkdir -p /home/xray
+	wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -O /home/xray/Xray-linux-64.zip
+	unzip /home/xray/Xray-linux-64.zip -d /home/xray
 
 # 修改 xray 配置文件
-cat <<EOF > /usr/local/etc/xray/config.json
+cat <<EOF > /home/xray/config.json
 {
     "inbounds":[
         {
@@ -295,7 +300,7 @@ cat <<EOF > /usr/local/etc/xray/config.json
               "clients": [
                 {
                   "id": "$uuid",
-                  "flow": "xtls-rprx-direct"
+                  "flow": ""
                 }
                          ],
             "decryption": "none",
@@ -383,10 +388,27 @@ cat <<EOF > /usr/local/etc/xray/config.json
     ]
 }
 EOF
+#写入守护进程
+cat <<EOF > /usr/lib/systemd/system/xray.service
+[Unit]
+Description="xray"
 
+[Service]
+Type=simple
+GuessMainPID=true
+WorkingDirectory=/home/xray
+StandardOutput=journal
+StandardError=journal
+ExecStart=/home/xray/xray
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
 # 重启 xray 和 nginx
-ufw reload
-systemctl restart xray
+systemctl daemon-reload
+systemctl start xray
+systemctl enable xray
 systemctl restart nginx
 
 # 生成 VMESS over WebSocket 的链接
