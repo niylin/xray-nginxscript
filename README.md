@@ -7,7 +7,13 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
-
+未测试版,自动解析支持所有域名
+<div>
+  <button class="btn" data-clipboard-target="#code"></button>
+  <pre><code id="code" class="language-python">
+  wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
+  </code></pre>
+</div>
 ## xray一键安装脚本,nginx前置  
 请确保10001-10004端口未被占用  
 此脚本会卸载apache和nginx.如不想卸载,请及时选n,5秒确认时间  
