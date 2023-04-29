@@ -145,7 +145,6 @@ else
 			fi
      fi
     fi
-   fi
 
 # 生成 UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
