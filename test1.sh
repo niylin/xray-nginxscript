@@ -33,12 +33,12 @@ fi
 # 安装必要的软件包
 if [ -f /etc/debian_version ]; then
     apt-get update
-    apt-get install -y curl unzip lsof git ufw nginx
+    apt-get install -y curl unzip lsof git ufw nginx jq
 elif [ -f /etc/redhat-release ]; then
     yum install epel-release
     yum clean all
     yum makecache
-    yum install -y curl unzip lsof git ufw nginx
+    yum install -y curl unzip lsof git ufw nginx jq
 fi
 
 # 配置防火墙规则
