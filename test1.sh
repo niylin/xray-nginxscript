@@ -436,22 +436,52 @@ TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=
 # 生成 Shadowsocks 的链接
 Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@${domain_name}:443" | base64 -w 0)
 
+# 生成clash配置
+config="\  
+  - name: -vmess
+    server: $domain_name
+    port: 443
+    type: vmess
+    uuid: $uuid
+    alterId: 0
+    cipher: auto
+    tls: true
+    servername: $domain_name
+    network: ws
+    ws-opts:
+      path: /$uuid-vm
+      headers:
+        Host: $domain_name
+  - name: -trojan
+    server: $domain_name
+    port: 443
+    type: trojan
+    tls: true
+    servername: $domain_name
+    network: ws
+    ws-opts:
+      path: /$uuid-tr
+    password: $uuid
+    sni: $domain_name"
 # 输出链接
 echo "------------------------------------------------------" > /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo  "$VMESS_LINK" >> /root/link.conf
 echo  "$VLESS_LINK" >> /root/link.conf
 echo  "$TROJAN_LINK" >> /root/link.conf
-echo  "ss://${Shadowsocks_LINK}#-shadowsocks" >> /root/link.conf
-echo "######################################################" >> /root/link.conf
-echo "######################################################" >> /root/link.conf
+echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks" >> /root/link.conf
 echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
-echo  "uuid=$uuid" >> /root/link.conf
-echo  "server=sni=host=$domain_name" >> /root/link.conf
 echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
-echo  "alist会自动配置虚拟驱动,默认用户名:admin 密码:guest1548pppppfddf 如重置删除/opt/alist/data目录即可" >> /root/link.conf
-echo  "此配置保存在/root/link.conf" >> /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo "clash配置Trojan,vmess" >> /root/link.conf
+echo "$config" >> /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
+echo  "sspath=/$uuid-ss" >> /root/link.conf
+echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 
 # 输出链接
 echo "------------------------------------------------------"
@@ -459,31 +489,21 @@ echo "------------------------------------------------------"
 echo  "$VMESS_LINK"
 echo  "$VLESS_LINK"
 echo  "$TROJAN_LINK"
-echo  "ss://${Shadowsocks_LINK}#-shadowsocks"
-echo "------------------------------------------------------"
-echo "------------------------------------------------------"
+echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks"
 echo  "Shadowsocks需要手动添加tls信息"
-echo  "uuid=$uuid"
-echo  "server=sni=host=$domain_name"
 echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
-echo  "alist会自动配置虚拟驱动,默认用户名:admin 密码:guest1548pppppfddf 如重置删除/opt/alist/data目录即可"
+echo "------------------------------------------------------"
+echo "------------------------------------------------------"
+echo "clash配置Trojan,vmess"
+echo "$config"
+echo "------------------------------------------------------"
+echo "------------------------------------------------------"
 echo  "此配置保存在/root/link.conf"
-echo  "脚本会自动开启80,443,22端口,安装curl unzip lsof git ufw nginx"
-echo "###########################################################"
-echo "###########################################################"
-echo "###########################################################"
+echo  "脚本会自动开启80,443,22端口,安装curl,git,lsof,ufw,unzip"
+echo "------------------------------------------------------"
+echo "------------------------------------------------------"
 echo "如果访问伪装页面失败,尝试使用以下命令手动重启ufw及nginx"
 echo "重启ufw:    ufw reload"
 echo "重启nginx:  systemctl restart nginx"
-echo "或使用'pkill -9 nginx'+'nginx'重启nginx"
 echo "重启xray:   systemctl restart xray"
-echo "           ,     ,\n"
-echo "           (\\____/)\n"
-echo "            (_oo_)\n"
-echo "              (O)\n"
-echo "            __||__    \\)\n"
-echo "         []/______\\[] /\n"
-echo "         / \\______/ \\/\n"
-echo "        /    /__\\\n"
-echo "       (\\   /____\\\n"
