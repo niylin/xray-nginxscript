@@ -449,7 +449,19 @@ config="\
     ws-opts:
       path: /$uuid-tr
     password: $uuid
-    sni: $domain_name"
+    sni: $domain_name
+  - name: -vless
+    type: vless
+    server: $domain_name
+    port: 443
+    uuid: $uuid
+    cipher: none
+    tls: true
+    network: ws
+    ws-opts:
+      path: /$uuid-vl
+      headers:
+        Host: $domain_name"
 # 输出链接
 echo "------------------------------------------------------" > /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
