@@ -469,7 +469,7 @@ echo "------------------------------------------------------" >> /root/link.conf
 echo  "$VMESS_LINK" >> /root/link.conf
 echo  "$VLESS_LINK" >> /root/link.conf
 echo  "$TROJAN_LINK" >> /root/link.conf
-echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks" >> /root/link.conf
+echo  "ss://${Shadowsocks_LINK}#-shadowsocks" >> /root/link.conf
 echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
 echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
@@ -489,7 +489,7 @@ echo "------------------------------------------------------"
 echo  "$VMESS_LINK"
 echo  "$VLESS_LINK"
 echo  "$TROJAN_LINK"
-echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks"
+echo  "ss://${Shadowsocks_LINK}#-shadowsocks"
 echo  "Shadowsocks需要手动添加tls信息"
 echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
