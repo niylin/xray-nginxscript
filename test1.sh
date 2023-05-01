@@ -462,7 +462,19 @@ config="\
     ws-opts:
       path: /$uuid-tr
     password: $uuid
-    sni: $domain_name"
+    sni: $domain_name
+  - name: -vless
+    type: vless
+    server: $domain_name
+    port: 443
+    uuid: $uuid
+    cipher: none
+    tls: true
+    network: ws
+    ws-opts:
+      path: /$uuid-vl
+      headers:
+        Host: $domain_name"
 # 输出链接
 echo "------------------------------------------------------" > /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
@@ -475,7 +487,7 @@ echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
-echo "clash配置Trojan,vmess" >> /root/link.conf
+echo "clash配置Trojan,vmess.添加vless需要meta核心" >> /root/link.conf
 echo "$config" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
@@ -495,7 +507,7 @@ echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
-echo "clash配置Trojan,vmess"
+echo "clash配置Trojan,vmess.添加vless需要meta核心"
 echo "$config"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
