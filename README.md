@@ -24,10 +24,15 @@
 ## xray一键安装脚本,nginx前置  
 请确保10001-10004端口未被占用  
 此脚本会卸载apache和nginx.如不想卸载,请及时选n,5秒确认时间  
+
 vless+ws+tls  
+
 vmess+ws+tls  
+
 Trojan+ws+tls  
+
 shadowsocks+ws+tls  
+
 四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
  
 ### 自动解析  
