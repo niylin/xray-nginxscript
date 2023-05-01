@@ -474,7 +474,7 @@ echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
-echo "clash配置Trojan,vmess" >> /root/link.conf
+echo "clash配置Trojan,vmess.添加vless需要meta核心" >> /root/link.conf
 echo "$config" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
@@ -494,7 +494,7 @@ echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
-echo "clash配置Trojan,vmess"
+echo "clash配置Trojan,vmess.添加vless需要meta核心"
 echo "$config"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
