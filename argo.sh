@@ -6,20 +6,15 @@ echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudf
 apt-get update && apt-get install cloudflared
 jiedian_name=$(hostname)
 uuid=$(cat /proc/sys/kernel/random/uuid)
-domain_name=$uuid.nnn.uw.to
-# read -p "请输入您的域名： " domain_name
-echo "请选择如何设置证书："
-echo "1. 手动上传证书"
-echo "2. 输入证书密钥"
-echo "3. 使用 Cloudflare 账户登录"
+default_domain="$uuid.nnn.uw.to"
 
-mkdir -p /root/.cloudflared/
-read -p "请输入选项（1/2/3）：" cert_option
+read -p "是否使用内置证书和域名 $default_domain (Y/n)? " use_default_domain
 
-if [ "$cert_option" = "1" ]; then
-    read -p "请上传证书到 /root/.cloudflared/cert.pem 后按 Enter 键继续。"
-elif [ "$cert_option" = "2" ]; then
-	cat << EOF > /root/.cloudflared/cert.pem
+if [[ "$use_default_domain" =~ ^[Nn]$ ]]; then
+  read -p "请输入您的域名： " domain_name
+else
+  domain_name=$default_domain
+cat << EOF > /root/.cloudflared/cert.pem
 -----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg0zxMXJNQ6quvDXbS
 5zNaNI6PHnXiqX5vtRinyRtE3fChRANCAASgZ4RBIeL433GKxw2iUFPlMqGkjlrk
@@ -55,14 +50,25 @@ MWEwNWFlOGMiLCJhcGlUb2tlbiI6Ik1zRmhTSThwa1E4N1F4YkppU3FCVGg1a3hf
 V0FVb1BLd3lUTkF4NGsifQ==
 -----END ARGO TUNNEL TOKEN-----
 EOF
+fi
+
+echo "请选择如何设置证书："
+echo "1. 手动上传证书"
+echo "3. 使用 Cloudflare 账户登录"
+
+mkdir -p /root/.cloudflared/
+read -p "请输入选项（1/3）：" cert_option
+
+if [ "$cert_option" = "1" ]; then
+    read -p "请上传证书到 /root/.cloudflared/cert.pem 后按 Enter 键继续。"
 elif [ "$cert_option" = "3" ]; then
     cloudflared tunnel login
 else
     echo "无效选项。"
     exit 1
 fi
-chmod 700 ~/.cloudflared
-chmod 600 ~/.cloudflared/cert.pem
+# chmod 700 ~/.cloudflared
+# chmod 600 ~/.cloudflared/cert.pem
 # 构建隧道
 cloudflared tunnel create $jiedian_name
 cloudflared tunnel route dns $jiedian_name "vm$domain_name"
