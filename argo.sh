@@ -7,7 +7,7 @@ apt-get update && apt-get install cloudflared
 jiedian_name=$(hostname)
 uuid=$(cat /proc/sys/kernel/random/uuid)
 default_domain="$uuid.nnn.uw.to"
-
+mkdir -p /root/.cloudflared/
 read -p "是否使用内置证书和域名 $default_domain (Y/n)? " use_default_domain
 
 if [[ "$use_default_domain" =~ ^[Nn]$ ]]; then
@@ -56,7 +56,6 @@ echo "请选择如何设置证书："
 echo "1. 手动上传证书"
 echo "3. 使用 Cloudflare 账户登录"
 
-mkdir -p /root/.cloudflared/
 read -p "请输入选项（1/3）：" cert_option
 
 if [ "$cert_option" = "1" ]; then
