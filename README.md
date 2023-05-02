@@ -21,6 +21,13 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/cfacme.sh && chmod +x cfacme.sh && ./cfacme.sh
   </code></pre>
 </div>
+使用argo搭建,选项2为内置证书和域名
+<div>
+  <button class="btn" data-clipboard-target="#code"></button>
+  <pre><code id="code" class="language-python">
+  wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/argo.sh && chmod +x argo.sh && ./argo.sh
+  </code></pre>
+</div>
 ## xray一键安装脚本,nginx前置  
 请确保10001-10004端口未被占用  
 此脚本会卸载apache和nginx.如不想卸载,请及时选n,5秒确认时间  
