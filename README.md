@@ -21,7 +21,7 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/cfacme.sh && chmod +x cfacme.sh && ./cfacme.sh
   </code></pre>
 </div>
-使用argo搭建,选项2为内置证书和域名
+使用argo搭建,选择内置域名和证书为一键完成
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
