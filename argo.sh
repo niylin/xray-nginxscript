@@ -10,9 +10,7 @@ default_domain="$uuid.nnn.uw.to"
 mkdir -p /root/.cloudflared/
 read -p "是否使用内置证书和域名 $default_domain (Y/n)? " use_default_domain
 
-if [[ "$use_default_domain" =~ ^[Nn]$ ]]; then
-  read -p "请输入您的域名： " domain_name
-else
+if [[ "$use_default_domain" =~ ^[Yy]$ ]]; then
   domain_name=$default_domain
 cat << EOF > /root/.cloudflared/cert.pem
 -----BEGIN PRIVATE KEY-----
@@ -50,21 +48,22 @@ MWEwNWFlOGMiLCJhcGlUb2tlbiI6Ik1zRmhTSThwa1E4N1F4YkppU3FCVGg1a3hf
 V0FVb1BLd3lUTkF4NGsifQ==
 -----END ARGO TUNNEL TOKEN-----
 EOF
-fi
-
-echo "请选择如何设置证书："
-echo "1. 手动上传证书"
-echo "3. 使用 Cloudflare 账户登录"
-
-read -p "请输入选项（1/3）：" cert_option
-
-if [ "$cert_option" = "1" ]; then
-    read -p "请上传证书到 /root/.cloudflared/cert.pem 后按 Enter 键继续。"
-elif [ "$cert_option" = "3" ]; then
-    cloudflared tunnel login
 else
+  read -p "请输入您的域名： " domain_name
+  echo "请选择如何设置证书："
+  echo "1. 手动上传证书"
+  echo "2. 使用 Cloudflare 账户登录"
+
+  read -p "请输入选项（1/2）：" cert_option
+
+  if [ "$cert_option" = "1" ]; then
+    read -p "请上传证书到 /root/.cloudflared/cert.pem 后按 Enter 键继续。"
+  elif [ "$cert_option" = "2" ]; then
+    cloudflared tunnel login
+  else
     echo "无效选项。"
     exit 1
+  fi
 fi
 # chmod 700 ~/.cloudflared
 # chmod 600 ~/.cloudflared/cert.pem
