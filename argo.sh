@@ -237,7 +237,7 @@ VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"'$jiedian_name'-vmess","add":"'vm$
 VLESS_LINK="vless://$uuid@vl$domain_name:443?encryption=none&security=tls&sni=vl$domain_name&alpn=h2&fp=chrome&type=ws&host=vl$domain_name&path=%2F$uuid-vl#$jiedian_name-vless"
 
 # 生成 Trojan over WebSocket 的链接
-TROJAN_LINK="trojan://$uuid@vl$domain_name:443?security=tls&sni=vl$domain_name&alpn=h2&fp=chrome&type=ws&host=vl$domain_name&path=%2F$uuid-tr#$jiedian_name-trojan"
+TROJAN_LINK="trojan://$uuid@tr$domain_name:443?security=tls&sni=vl$domain_name&alpn=h2&fp=chrome&type=ws&host=vl$domain_name&path=%2F$uuid-tr#$jiedian_name-trojan"
 
 # 生成clash配置
 config="\  
