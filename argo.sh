@@ -65,8 +65,8 @@ else
     exit 1
   fi
 fi
-# chmod 700 ~/.cloudflared
-# chmod 600 ~/.cloudflared/cert.pem
+chmod 700 ~/.cloudflared
+chmod 600 ~/.cloudflared/cert.pem
 # 构建隧道
 cloudflared tunnel create $jiedian_name
 cloudflared tunnel route dns $jiedian_name "vm$domain_name"
