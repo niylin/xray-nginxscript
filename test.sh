@@ -389,6 +389,7 @@ cat <<EOF > /home/xray/config.json
 }
 EOF
 #写入守护进程
+mkdir -p /usr/lib/systemd/system/
 cat <<EOF > /usr/lib/systemd/system/xray.service
 [Unit]
 Description="xray"
