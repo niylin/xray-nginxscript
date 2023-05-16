@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # 系统信息检测
 distro=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
 if [[ "$distro" == *"Debian"* || "$distro" == *"Ubuntu"* ]]; then
@@ -306,9 +307,6 @@ done
 
 sed -i 's|aaaaidddddaa125647||g' /etc/nginx/conf.d/$domain_name.conf
 
-# 安装 xray
-# bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
-
    echo "安装xray..."
 	mkdir -p /home/xray
 	wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -O /home/xray/Xray-linux-64.zip
@@ -485,7 +483,6 @@ jiedianname_encoded=$(echo -n "$jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(.
 DR_jiedianname_encoded=$(echo -n "$DR_jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(..\)/%\1/g')
 
 # 生成clash配置
-# 生成clash配置
 config="\  
   - name: $jiedian_name-vmess
     type: vmess
@@ -620,4 +617,3 @@ echo "查看工作端口占用:   lsof -i :443"
 echo "重启ufw:    ufw reload"
 echo "重启nginx:  systemctl restart nginx"
 echo "重启xray:   systemctl restart xray"
-
