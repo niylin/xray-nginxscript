@@ -1,19 +1,13 @@
 # xray-nginx  
 ------------------------------------------------------------------------------------------------------------------------
-支持系统 Ubuntu,debian,centos7.自动解析不支持eu.org等域名
+支持系统 Ubuntu,debian,centos7
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
-自动解析支持所有域名,centos未测试
-<div>
-  <button class="btn" data-clipboard-target="#code"></button>
-  <pre><code id="code" class="language-python">
-  wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test1.sh && chmod +x test1.sh && ./test1.sh
-  </code></pre>
-</div>
+
 仅申请证书和解析
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
@@ -44,7 +38,7 @@ shadowsocks+ws+tls
  
 ### 自动解析  
 通过cloud flare API申请证书,并解析到本地ip,选择ip规则为去除本地回环地址的第一个地址.  
-输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书  
+输入域名,cfapi,cf邮箱即可完成安装,自动申请通配符证书 并添加两条解析记录,一个开启cdn,一个直连 
   
 ####  
 xray安装目录/home/xray  
