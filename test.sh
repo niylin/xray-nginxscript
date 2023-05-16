@@ -1,7 +1,6 @@
 #!/bin/bash
-
+# 系统信息检测
 distro=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-
 if [[ "$distro" == *"Debian"* || "$distro" == *"Ubuntu"* ]]; then
     echo "检测到 Debian/Ubuntu 操作系统"
 elif [[ "$distro" == *"CentOS Linux"* ]]; then
@@ -10,11 +9,38 @@ else
     echo "不支持的操作系统: $distro"
     exit 1
 fi
+# 检查网络连接
+if ! ping -q -c 1 -W 1 github.com >/dev/null && ! ping -q -c 1 -W 1 google.com >/dev/null; then
+  # 无法联网，写入 DNS 信息
+  echo "无法连接网络,正在写入DNS信息..."
+  cat <<EOF > /etc/resolv.conf
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver 2001:4860:4860::8888
+nameserver 2606:4700:4700::1111
+EOF
 
+  systemctl restart networking.service
+fi
+# 网络连接状态
+if ping -q -c 1 -W 1 github.com >/dev/null || ping -q -c 1 -W 1 google.com >/dev/null; then
+  echo "已联网"
+else
+  echo "无法连接互联网"
+fi
+# 获取用户信息
+read -p "请输入您的域名： " domain_name
+read -p "请为结点命名： " jiedian_name
+read -p "请输入您的 Cloudflare API 密钥: " api_key
+read -p "请输入您的 Cloudflare 邮件地址: " email
+echo "请选择要解析的IP地址类型："
+echo "[1] IPv6"
+echo "[2] IPv4"
+read -p "请输入选项数字: " ip_type_choice
 # Check if web server is installed
 if pgrep -x "apache2" >/dev/null || pgrep -x "httpd" >/dev/null || pgrep -x "nginx" >/dev/null; then
     # Prompt user to uninstall web server
-    read -t 5 -p "检测到已经安装了 Web 服务器，是否需要卸载？(y/n，默认5秒后自动选择卸载): " -n 1 -r uninstall_webserver || uninstall_webserver="y"
+    read -t 5 -p "检测到已经安装了 Web 服务器，是否需要卸载？(y/n，默认5秒后自动选择卸载 如不卸载请确保443端口未被占用): " -n 1 -r uninstall_webserver || uninstall_webserver="y"
     echo ""
 
     if [[ $uninstall_webserver =~ ^[Yy]$ ]]
@@ -30,17 +56,54 @@ if pgrep -x "apache2" >/dev/null || pgrep -x "httpd" >/dev/null || pgrep -x "ngi
     fi
 fi
 
-# 安装必要的软件包
+# 安装必要及常用的软件包
 if [ -f /etc/debian_version ]; then
     apt-get update
-    apt-get install -y curl unzip lsof git ufw nginx
+    apt-get install -y curl unzip lsof git ufw nginx jq vim sudo
 elif [ -f /etc/redhat-release ]; then
-    yum install epel-release
+    yum install -y epel-release
     yum clean all
     yum makecache
-    yum install -y curl unzip lsof git ufw nginx
+    yum install -y curl unzip lsof git ufw nginx jq vim sudo
+fi
+# 生成节点名
+declare -A flag_map
+flag_map["法国"]="🇫🇷"
+flag_map["英国"]="🇬🇧"
+flag_map["美国"]="🇺🇸"
+flag_map["新加坡"]="🇸🇬"
+flag_map["德国"]="🇩🇪"
+flag_map["澳大利亚"]="🇦🇺"
+flag_map["日本"]="🇯🇵"
+flag_map["加拿大"]="🇨🇦"
+flag_map["韩国"]="🇰🇷"
+flag_map["俄罗斯"]="🇷🇺"
+flag_map["荷兰"]="🇳🇱"
+flag_map["瑞士"]="🇨🇭"
+flag_map["瑞典"]="🇸🇪"
+flag_map["挪威"]="🇳🇴"
+flag_map["南非"]="🇿🇦"
+flag_map["印度"]="🇮🇳"
+flag_map["西班牙"]="🇪🇸"
+flag_map["丹麦"]="🇩🇰"
+flag_map["芬兰"]="🇫🇮"
+flag_map["爱尔兰"]="🇮🇪"
+flag_map["波兰"]="🇵🇱"
+flag_map["中国"]="🇨🇳"
+
+#  获取地理位置信息
+geo_info=$(curl -s ip.ping0.cc/geo)
+
+# 提取国家信息
+country=$(echo $geo_info | awk -F ' ' '{print $2}')
+
+# 根据国家生成旗帜字符
+if [[ ${flag_map[$country]+_} ]]; then
+    flag="${flag_map[$country]}"
+    jiedian_name=" $flag CF | ${jiedian_name#* } "
 fi
 
+DR_jiedian_name=${jiedian_name/ CF | / DR | }
 # 配置防火墙规则
 ufw default deny incoming
 ufw default allow outgoing
@@ -49,12 +112,9 @@ ufw allow 443/tcp
 ufw allow 22/tcp
 yes | ufw enable
 ufw reload
+# 安装wgcf
+wget -N https://raw.githubusercontent.com/fscarmen/warp/main/menu.sh && echo -e "2\n1\n3\n" | bash menu.sh d
 
-# 获取用户输入的域名
-read -p "请输入您的域名： " domain_name
-
-read -p "请输入您的 Cloudflare API 密钥: " api_key
-read -p "请输入您的 Cloudflare 邮件地址: " email
 
 # 安装 acme.sh
 curl https://get.acme.sh | sh -s email=$email
@@ -76,10 +136,7 @@ mkdir -p /home/cert
     --fullchain-file /home/cert/$domain_name.crt
 
 #自动添加解析
-echo "请选择要解析的IP地址类型："
-echo "[1] IPv6"
-echo "[2] IPv4"
-read -p "请输入选项数字: " ip_type_choice
+original_domain_name=$domain_name
 
 if [ "$ip_type_choice" != "1" ] && [ "$ip_type_choice" != "2" ]; then
     echo "无效的选项，跳过添加 DNS 解析记录。"
@@ -94,45 +151,42 @@ else
         record_type="A"
     fi
 
-    # 获取 Zone ID
-    zone_name=$(echo "${domain_name}" | awk -F '.' '{print $(NF-1)"."$NF}')
-    if [ -z "$zone_name" ]; then
-        echo "无效的域名提供，跳过添加 DNS 解析记录。"
+    # 获取 domain_name 的 Zone ID
+    curl_head=(
+        "X-Auth-Email: ${CF_Email}"
+        "X-Auth-Key: ${CF_Key}"
+        "Content-Type: application/json"
+    )
+        while [[ "$original_domain_name" =~ \. ]]; do
+original_domain_name="${original_domain_name#*.}"
+curl_url="https://api.cloudflare.com/client/v4/zones?name=${original_domain_name}"
+response_json_str=$(curl -sS --request GET "${curl_url}" --header "${curl_head[0]}" --header "${curl_head[1]}" --header "${curl_head[2]}")
+zone_id_temp=$(echo "${response_json_str}" | jq -r '.result[0] | select(. != null) | .id')
+    
+    if [ ! -z "$zone_id_temp" ]; then
+        zone_id="$zone_id_temp"
+        echo "子域名 ${original_domain_name} 的区域 ID 为：$zone_id"
+    fi
+done
+    if curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+      -H "X-Auth-Email: $CF_Email" \
+      -H "X-Auth-Key: $CF_Key" \
+      -H "Content-Type: application/json" \
+      --data "{\"type\":\"$record_type\",\"name\":\"$domain_name\",\"content\":\"$ip_address\",\"ttl\":1,\"proxied\":true}" > /dev/null; then
+      echo "CDN域名解析成功！"
     else
-	zone_id=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=${zone_name}" \
-		-H "X-Auth-Email: ${CF_Email}" \
-		-H "X-Auth-Key: ${CF_Key}" \
-		-H "Content-Type: application/json" | grep -oP '(?<="id":")[^"]*' | head -n1)
-
-        if [ -z "$zone_id" ]; then
-            echo "无法获取域名 $domain_name 的区域 ID，跳过添加 DNS 解析记录。"
-        else
-            echo "您的区域 ID 为：$zone_id"
-
-            echo "请选择 CDN 加速："
-            echo "[1] 开启"
-            echo "[2] 不开启"
-            read -p "请输入选项数字: " cdn_choice
-
-            if [ "$cdn_choice" == "1" ]; then
-               cdn=true
-            else
-            cdn=false
-            fi
-            # 添加解析记录
-            if curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
-              -H "X-Auth-Email: $CF_Email" \
-              -H "X-Auth-Key: $CF_Key" \
-              -H "Content-Type: application/json" \
-              --data "{\"type\":\"$record_type\",\"name\":\"$domain_name\",\"content\":\"$ip_address\",\"ttl\":1,\"proxied\":$cdn}" > /dev/null; then
-		      echo "域名解析成功！"
-			  else
-			  echo "域名解析失败,尝试手动添加。"
-			fi
-        fi
+      echo "主机名解析添加失败，尝试手动添加。"
+    fi
+    if curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+      -H "X-Auth-Email: $CF_Email" \
+      -H "X-Auth-Key: $CF_Key" \
+      -H "Content-Type: application/json" \
+      --data "{\"type\":\"$record_type\",\"name\":\"direct$domain_name\",\"content\":\"$ip_address\",\"ttl\":1,\"proxied\":false}" > /dev/null; then
+      echo "直连解析成功！"
+    else
+      echo "主机名解析添加失败，尝试手动添加。"
     fi
 fi
-
 # 生成 UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
 
@@ -145,7 +199,7 @@ server {
     ssl_certificate_key /home/cert/$domain_name.key;
     ssl_protocols         TLSv1.3;
     ssl_ecdh_curve        X25519:P-256:P-384:P-521;
-    server_name           $domain_name;
+    server_name           $domain_name direct.$domain_name;
     index index.html index.htm;
     root  /home/www/shipin1;
     error_page 400 = /400.html;
@@ -413,23 +467,30 @@ systemctl enable xray
 systemctl restart nginx
 
 # 生成 VMESS over WebSocket 的链接
-VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"-vmess","add":"'$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
+VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"'$jiedian_name'-vmess","add":"'$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
+DR_VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"'$DR_jiedian_name'-vmess","add":"'direct.$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'direct.$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'direct.$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
 
 # 生成 VLESS over WebSocket 的链接
-VLESS_LINK="vless://$uuid@$domain_name:443?encryption=none&security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-vl#-vless"
+VLESS_LINK="vless://$uuid@$domain_name:443?encryption=none&security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-vl#$jiedian_name-vless"
+DR_VLESS_LINK="vless://$uuid@direct.$domain_name:443?encryption=none&security=tls&sni=direct.$domain_name&alpn=h2&fp=chrome&type=ws&host=direct.$domain_name&path=%2F$uuid-vl#$DR_jiedian_name-vless"
 
 # 生成 Trojan over WebSocket 的链接
-TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-tr#-trojan"
+TROJAN_LINK="trojan://$uuid@$domain_name:443?security=tls&sni=$domain_name&alpn=h2&fp=chrome&type=ws&host=$domain_name&path=%2F$uuid-tr#$jiedian_name-trojan"
+DR_TROJAN_LINK="trojan://$uuid@direct.$domain_name:443?security=tls&sni=direct.$domain_name&alpn=h2&fp=chrome&type=ws&host=direct.$domain_name&path=%2F$uuid-tr#$DR_jiedian_name-trojan"
 
 # 生成 Shadowsocks 的链接
 Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@${domain_name}:443" | base64 -w 0)
+DR_Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@$direct{domain_name}:443" | base64 -w 0)
+jiedianname_encoded=$(echo -n "$jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(..\)/%\1/g')
+DR_jiedianname_encoded=$(echo -n "$DR_jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(..\)/%\1/g')
 
 # 生成clash配置
+# 生成clash配置
 config="\  
-  - name: -vmess
+  - name: $jiedian_name-vmess
+    type: vmess
     server: $domain_name
     port: 443
-    type: vmess
     uuid: $uuid
     alterId: 0
     cipher: auto
@@ -440,10 +501,10 @@ config="\
       path: /$uuid-vm
       headers:
         Host: $domain_name
-  - name: -trojan
+  - name: $jiedian_name-trojan
+    type: trojan
     server: $domain_name
     port: 443
-    type: trojan
     tls: true
     servername: $domain_name
     network: ws
@@ -451,7 +512,7 @@ config="\
       path: /$uuid-tr
     password: $uuid
     sni: $domain_name
-  - name: -vless
+  - name: $jiedian_name-vless
     type: vless
     server: $domain_name
     port: 443
@@ -462,20 +523,67 @@ config="\
     ws-opts:
       path: /$uuid-vl
       headers:
-        Host: $domain_name"
+        Host: $domain_name
+-----------------------------------------------------------------------------------
+DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT 
+------------------------------------------------------------------------------------
+  - name: $DR_jiedian_name-vmess
+    type: vmess
+    server: direct.$domain_name
+    port: 443
+    uuid: $uuid
+    alterId: 0
+    cipher: auto
+    tls: true
+    servername: direct.$domain_name
+    network: ws
+    ws-opts:
+      path: /$uuid-vm
+      headers:
+        Host: direct.$domain_name
+  - name: $DR_jiedian_name-trojan
+    type: trojan
+    server: direct.$domain_name
+    port: 443
+    tls: true
+    servername: direct.$domain_name
+    network: ws
+    ws-opts:
+      path: /$uuid-tr
+    password: $uuid
+    sni: direct.$domain_name
+  - name: $DR_jiedian_name-vless
+    type: vless
+    server: direct.$domain_name
+    port: 443
+    uuid: $uuid
+    cipher: none
+    tls: true
+    network: ws
+    ws-opts:
+      path: /$uuid-vl
+      headers:
+        Host: direct.$domain_name"
 # 输出链接
 echo "------------------------------------------------------" > /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo  "$VMESS_LINK" >> /root/link.conf
 echo  "$VLESS_LINK" >> /root/link.conf
 echo  "$TROJAN_LINK" >> /root/link.conf
-echo  "ss://${Shadowsocks_LINK}#-shadowsocks" >> /root/link.conf
+echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks" >> /root/link.conf
+echo  "------------------------------------------------------" >> /root/link.conf
+echo  "DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT "
+echo  "------------------------------------------------------" >> /root/link.conf
+echo  "$DR_VMESS_LINK" >> /root/link.conf
+echo  "$DR_VLESS_LINK" >> /root/link.conf
+echo  "$DR_TROJAN_LINK" >> /root/link.conf
+echo  "ss://${DR_Shadowsocks_LINK}#$DR_jiedianname_encoded-shadowsocks" >> /root/link.conf
 echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
 echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
-echo "clash配置Trojan,vmess.添加vless需要meta核心" >> /root/link.conf
+echo "clash配置Trojan,vmess" >> /root/link.conf
 echo "$config" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
 echo "------------------------------------------------------" >> /root/link.conf
@@ -484,26 +592,32 @@ echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 
 # 输出链接
+echo "------------------------------------------------------" > /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo  "$VMESS_LINK" >> /root/link.conf
+echo  "$VLESS_LINK" >> /root/link.conf
+echo  "$TROJAN_LINK" >> /root/link.conf
+echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks" >> /root/link.conf
+echo "------------------------------------------------------" >> /root/link.conf
+echo "DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT "
+echo "------------------------------------------------------" >> /root/link.conf
+echo  "$DR_VMESS_LINK" >> /root/link.conf
+echo  "$DR_VLESS_LINK" >> /root/link.conf
+echo  "$DR_TROJAN_LINK" >> /root/link.conf
+echo  "ss://${DR_Shadowsocks_LINK}#$DR_jiedianname_encoded-shadowsocks" >> /root/link.conf
+echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
+echo  "sspath=/$uuid-ss" >> /root/link.conf
+echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
-echo  "$VMESS_LINK"
-echo  "$VLESS_LINK"
-echo  "$TROJAN_LINK"
-echo  "ss://${Shadowsocks_LINK}#-shadowsocks"
-echo  "Shadowsocks需要手动添加tls信息"
-echo  "sspath=/$uuid-ss"
-echo  "开启ws, tls ,四种协议除path外其他参数均相同"
-echo "------------------------------------------------------"
-echo "------------------------------------------------------"
-echo "clash配置Trojan,vmess.添加vless需要meta核心"
+echo "clash配置Trojan,vmess"
 echo "$config"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
-echo  "此配置保存在/root/link.conf"
-echo  "脚本会自动开启80,443,22端口,安装curl,git,lsof,ufw,unzip"
-echo "------------------------------------------------------"
-echo "------------------------------------------------------"
+echo "此配置保存在/root/link.conf"
 echo "如果访问伪装页面失败,尝试使用以下命令手动重启ufw及nginx"
+echo "查看工作端口占用:   lsof -i :443"
 echo "重启ufw:    ufw reload"
 echo "重启nginx:  systemctl restart nginx"
 echo "重启xray:   systemctl restart xray"
+
