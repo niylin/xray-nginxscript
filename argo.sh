@@ -1,3 +1,29 @@
+#!/bin/bash
+
+# 系统信息检测
+if ! command -v apt >/dev/null 2>&1; then
+    echo "包管理器不是apt，退出"
+    exit 1
+fi
+# 检查网络连接
+if ! ping -q -c 1 -W 1 github.com >/dev/null && ! ping -q -c 1 -W 1 google.com >/dev/null; then
+  # 无法联网，写入 DNS 信息
+  echo "无法连接网络,正在写入DNS信息..."
+  cat <<EOF > /etc/resolv.conf
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver 2001:4860:4860::8888
+nameserver 2606:4700:4700::1111
+EOF
+
+  systemctl restart networking.service
+fi
+# 网络连接状态
+if ping -q -c 1 -W 1 github.com >/dev/null || ping -q -c 1 -W 1 google.com >/dev/null; then
+  echo "已联网"
+else
+  echo "无法连接互联网"
+fi
 apt update && apt -y install curl
 mkdir -p --mode=0755 /usr/share/keyrings
 curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
