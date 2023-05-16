@@ -1,17 +1,13 @@
-#!/bin/bash
 apt update && apt -y install curl
 mkdir -p --mode=0755 /usr/share/keyrings
 curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
 echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared buster main' | tee /etc/apt/sources.list.d/cloudflared.list
 apt-get update && apt-get install cloudflared
-jiedian_name=$(hostname)
-uuid=$(cat /proc/sys/kernel/random/uuid)
-default_domain="$uuid.nnn.uw.to"
-mkdir -p /root/.cloudflared/
-read -p "是否使用内置证书和域名 $default_domain (Y/n)? " use_default_domain
 
-if [[ "$use_default_domain" =~ ^[Yy]$ ]]; then
-  domain_name=$default_domain
+uuid=$(cat /proc/sys/kernel/random/uuid)
+jiedian_name=$uuid
+domain_name="$uuid.nnn.uw.to"
+mkdir -p /root/.cloudflared/
 cat << EOF > /root/.cloudflared/cert.pem
 -----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg0zxMXJNQ6quvDXbS
@@ -48,31 +44,8 @@ MWEwNWFlOGMiLCJhcGlUb2tlbiI6Ik1zRmhTSThwa1E4N1F4YkppU3FCVGg1a3hf
 V0FVb1BLd3lUTkF4NGsifQ==
 -----END ARGO TUNNEL TOKEN-----
 EOF
-else
-  read -p "请输入您的域名： " domain_name
-  echo "请选择如何设置证书："
-  echo "1. 手动上传证书"
-  echo "2. 使用 Cloudflare 账户登录"
-
-  read -p "请输入选项（1/2）：" cert_option
-
-  if [ "$cert_option" = "1" ]; then
-    read -p "请上传证书到 /root/.cloudflared/cert.pem 后按 Enter 键继续。"
-  elif [ "$cert_option" = "2" ]; then
-    cloudflared tunnel login
-  else
-    echo "无效选项。"
-    exit 1
-  fi
-fi
-chmod 700 ~/.cloudflared
-chmod 600 ~/.cloudflared/cert.pem
-# 构建隧道
 cloudflared tunnel create $jiedian_name
-cloudflared tunnel route dns $jiedian_name "vm$domain_name"
 cloudflared tunnel route dns $jiedian_name "tr$domain_name"
-cloudflared tunnel route dns $jiedian_name "vl$domain_name"
-
 for file in /root/.cloudflared/*.json; do
   if [[ -r "$file" ]]; then
     # 使用 basename 命令获取文件名，不包括扩展名
@@ -82,7 +55,6 @@ for file in /root/.cloudflared/*.json; do
     echo "Name: $name"
   fi
 done
-
 cat <<EOF > /root/.cloudflared/config.yml
 tunnel: $name
 credentials-file: $file
@@ -92,10 +64,6 @@ originRequest:
   noTLSVerify: false
 
 ingress:
-  - hostname: vm${domain_name}
-    service: http://localhost:10001
-  - hostname: vl${domain_name}
-    service: http://localhost:10002
   - hostname: tr${domain_name}
     service: http://localhost:10003
   - service: http_status:404
@@ -222,38 +190,17 @@ cat <<EOF > /home/xray/config.json
     ]
 }
 EOF
-
 # 重启 xray 
 systemctl daemon-reload
-systemctl start xray
+systemctl restart xray
 systemctl enable xray
 cloudflared service install
 systemctl start cloudflared
-# 生成 VMESS over WebSocket 的链接
-VMESS_LINK="vmess://$(echo -n '{"v":"2","ps":"'$jiedian_name'-vmess","add":"'vm$domain_name'","port":"443","id":"'$uuid'","aid":"0","scy":"none","net":"ws","type":"none","host":"'vm$domain_name'","path":"/'$uuid'-vm","tls":"tls","sni":"'vm$domain_name'","alpn":"h2","fp":"chrome"}' | base64 -w 0)"
-
-# 生成 VLESS over WebSocket 的链接
-VLESS_LINK="vless://$uuid@vl$domain_name:443?encryption=none&security=tls&sni=vl$domain_name&alpn=h2&fp=chrome&type=ws&host=vl$domain_name&path=%2F$uuid-vl#$jiedian_name-vless"
-
 # 生成 Trojan over WebSocket 的链接
 TROJAN_LINK="trojan://$uuid@tr$domain_name:443?security=tls&sni=vl$domain_name&alpn=h2&fp=chrome&type=ws&host=vl$domain_name&path=%2F$uuid-tr#$jiedian_name-trojan"
 
 # 生成clash配置
 config="\  
-  - name: $jiedian_name-vmess
-    server: vm$domain_name
-    port: 443
-    type: vmess
-    uuid: $uuid
-    alterId: 0
-    cipher: auto
-    tls: true
-    servername: vm$domain_name
-    network: ws
-    ws-opts:
-      path: /$uuid-vm
-      headers:
-        Host: vm$domain_name
   - name: $jiedian_name-trojan
     server: tr$domain_name
     port: 443
@@ -264,25 +211,10 @@ config="\
     ws-opts:
       path: /$uuid-tr
     password: $uuid
-    sni: tr$domain_name
-  - name: $jiedian_name-vless
-    type: vless
-    server: vl$domain_name
-    port: 443
-    uuid: $uuid
-    cipher: none
-    tls: true
-    network: ws
-    ws-opts:
-      path: /$uuid-vl
-      headers:
-        Host: vl$domain_name"
+    sni: tr$domain_name"
 
 # 输出链接
-echo  "$VMESS_LINK"
-echo  "$VLESS_LINK"
 echo  "$TROJAN_LINK"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
-echo "clash配置trojan,vmess"
 echo "$config"
