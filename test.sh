@@ -484,9 +484,11 @@ Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@${domain_name}:443" |
 DR_Shadowsocks_LINK=$(echo -n "chacha20-ietf-poly1305:${uuid}@$direct{domain_name}:443" | base64 -w 0)
 jiedianname_encoded=$(echo -n "$jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(..\)/%\1/g')
 DR_jiedianname_encoded=$(echo -n "$DR_jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(..\)/%\1/g')
-
 # 生成clash配置
 config="\  
+------------------------------------------------------------------------------------
+clash只能使用trojan和vmess,请勿添加vless,会导致出错.vless需要更换meta核心
+-------------------------------------------------------------------------------------
   - name: $jiedian_name-vmess
     type: vmess
     server: $domain_name
@@ -524,9 +526,6 @@ config="\
       path: /$uuid-vl
       headers:
         Host: $domain_name
------------------------------------------------------------------------------------
-DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT 
-------------------------------------------------------------------------------------
   - name: $DR_jiedian_name-vmess
     type: vmess
     server: direct.$domain_name
@@ -592,22 +591,20 @@ echo  "sspath=/$uuid-ss" >> /root/link.conf
 echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
 
 # 输出链接
-echo "------------------------------------------------------" > /root/link.conf
-echo "------------------------------------------------------" >> /root/link.conf
-echo  "$VMESS_LINK" >> /root/link.conf
-echo  "$VLESS_LINK" >> /root/link.conf
-echo  "$TROJAN_LINK" >> /root/link.conf
-echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks" >> /root/link.conf
-echo "------------------------------------------------------" >> /root/link.conf
-echo "DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT DIRECT "
-echo "------------------------------------------------------" >> /root/link.conf
-echo  "$DR_VMESS_LINK" >> /root/link.conf
-echo  "$DR_VLESS_LINK" >> /root/link.conf
-echo  "$DR_TROJAN_LINK" >> /root/link.conf
-echo  "ss://${DR_Shadowsocks_LINK}#$DR_jiedianname_encoded-shadowsocks" >> /root/link.conf
-echo  "Shadowsocks需要手动添加tls信息" >> /root/link.conf
-echo  "sspath=/$uuid-ss" >> /root/link.conf
-echo  "开启ws, tls ,四种协议除path外其他参数均相同" >> /root/link.conf
+echo "------------------------------------------------------"
+echo "前四条为CDN节点,后四条为直连节点"
+echo "------------------------------------------------------"
+echo  "$VMESS_LINK"
+echo  "$VLESS_LINK"
+echo  "$TROJAN_LINK"
+echo  "ss://${Shadowsocks_LINK}#$jiedianname_encoded-shadowsocks"
+echo  "$DR_VMESS_LINK"
+echo  "$DR_VLESS_LINK"
+echo  "$DR_TROJAN_LINK"
+echo  "ss://${DR_Shadowsocks_LINK}#$DR_jiedianname_encoded-shadowsocks"
+echo  "Shadowsocks需要手动添加tls信息"
+echo  "sspath=/$uuid-ss"
+echo  "开启ws, tls ,四种协议除path外其他参数均相同"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
 echo "clash配置Trojan,vmess"
