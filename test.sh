@@ -47,7 +47,10 @@ if pgrep -x "apache2" >/dev/null || pgrep -x "httpd" >/dev/null || pgrep -x "ngi
     if [[ $uninstall_webserver =~ ^[Yy]$ ]]
     then
         echo "开始卸载 Web 服务器..."
-        pkill -9 apache2 httpd nginx
+        echo "开始卸载 Web 服务器..."
+        pkill -9 apache2
+        pkill -9 httpd
+        pkill -9 nginx
 
         if [ -x "$(command -v apt-get)" ]; then
             apt-get purge -y apache2 apache2.2-common nginx
