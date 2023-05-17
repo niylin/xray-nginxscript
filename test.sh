@@ -185,7 +185,7 @@ done
       -H "X-Auth-Email: $CF_Email" \
       -H "X-Auth-Key: $CF_Key" \
       -H "Content-Type: application/json" \
-      --data "{\"type\":\"$record_type\",\"name\":\"direct$domain_name\",\"content\":\"$ip_address\",\"ttl\":1,\"proxied\":false}" > /dev/null; then
+      --data "{\"type\":\"$record_type\",\"name\":\"direct.$domain_name\",\"content\":\"$ip_address\",\"ttl\":1,\"proxied\":false}" > /dev/null; then
       echo "直连解析成功！"
     else
       echo "主机名解析添加失败，尝试手动添加。"
