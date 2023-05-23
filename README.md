@@ -1,6 +1,6 @@
 # xray-nginx  
 ------------------------------------------------------------------------------------------------------------------------
-支持系统 Ubuntu,debian,centos7
+支持系统 Ubuntu,debian,centos7 
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
@@ -15,7 +15,7 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/cfacme.sh && chmod +x cfacme.sh && ./cfacme.sh
   </code></pre>
 </div>
-使用argo搭建,选择内置域名和证书为一键完成
+使用argo搭建,选择内置域名和证书为一键完成,不需要公网ip和通用端口,机器可以访问网络就可以使用
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
