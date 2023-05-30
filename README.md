@@ -22,7 +22,7 @@
   wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/argo.sh && chmod +x argo.sh && ./argo.sh
   </code></pre>
 </div>
-## xray一键安装脚本,nginx前置  
+## xray一键安装脚本,nginx前置,包含fscarmen的wgcf安装  
 请确保10001-10004端口未被占用  
 此脚本会卸载apache和nginx.如不想卸载,请及时选n,5秒确认时间  
 
