@@ -31,7 +31,7 @@ else
 fi
 # 获取用户信息
 read -p "请输入您的域名： " domain_name
-read -p "请为结点命名： " jiedian_name
+read -p "请为结点命名,可任意输入： " jiedian_name
 read -p "请输入您的 Cloudflare API 密钥: " api_key
 read -p "请输入您的 Cloudflare 邮件地址: " email
 echo "请选择要解析的IP地址类型："
@@ -104,7 +104,7 @@ country=$(echo $geo_info | awk -F ' ' '{print $2}')
 # 根据国家生成旗帜字符
 if [[ ${flag_map[$country]+_} ]]; then
     flag="${flag_map[$country]}"
-    jiedian_name=" $flag CF | ${jiedian_name#* } "
+    jiedian_name="$flag CF | ${jiedian_name} "
 fi
 
 DR_jiedian_name=${jiedian_name/ CF | / DR | }
@@ -443,6 +443,28 @@ cat <<EOF > /home/xray/config.json
     ]
 }
 EOF
+
+# 安装hysteria
+mkdir -p /home/hysteria
+wget https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64 -O /home/hysteria/hysteria-linux-amd64
+chmod +x /home/hysteria/hysteria-linux-amd64
+
+cat <<EOF > /home/hysteria/config.json
+{
+    "listen": ":19999",
+    "cert": "/home/cert/$domain_name.crt",
+    "key": "/home/cert/$domain_name.key",
+    "up_mbps": 30,
+    "down_mbps": 50,
+    "obfs": "$uuid"
+}
+EOF
+
+# 添加转发
+iptables -t nat -A PREROUTING -p tcp --dport 20000:30000 -j REDIRECT --to-port 19999
+iptables -t nat -A PREROUTING -p udp --dport 20000:30000 -j REDIRECT --to-port 19999
+ip6tables -t nat -A PREROUTING -p tcp --dport 20000:30000 -j REDIRECT --to-port 19999
+ip6tables -t nat -A PREROUTING -p udp --dport 20000:30000 -j REDIRECT --to-port 19999
 #写入守护进程
 mkdir -p /usr/lib/systemd/system/
 cat <<EOF > /usr/lib/systemd/system/xray.service
@@ -461,10 +483,26 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
+cat <<EOF > /usr/lib/systemd/system/hysteria.service
+[Unit]
+Description=Hysteria
+
+[Service]
+Type=simple
+GuessMainPID=true
+WorkingDirectory=/home/hysteria
+ExecStart=/home/hysteria/hysteria-linux-amd64 -config /home/hysteria/config.json server
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
 # 重启 xray 和 nginx
 systemctl daemon-reload
 systemctl start xray
 systemctl enable xray
+systemctl start hysteria
+systemctl enable hysteria
 systemctl restart nginx
 
 # 生成 VMESS over WebSocket 的链接
@@ -486,9 +524,15 @@ jiedianname_encoded=$(echo -n "$jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(.
 DR_jiedianname_encoded=$(echo -n "$DR_jiedian_name" | xxd -p | tr -d '\n' | sed 's/\(..\)/%\1/g')
 # 生成clash配置
 config="\  
-------------------------------------------------------------------------------------
-clash只能使用trojan和vmess,请勿添加vless,会导致出错.vless需要更换meta核心
--------------------------------------------------------------------------------------
+  - name: $HY_jiedian_name
+    type: hysteria
+    server: direct.$domain_name
+    port: 19999
+    ports: 20000-30000 #port 不可省略
+    obfs: $uuid
+    protocol: udp #支持 udp/wechat-video/faketcp
+    up: 30
+    down: 100
   - name: $jiedian_name-vmess
     type: vmess
     server: $domain_name
@@ -607,13 +651,16 @@ echo  "sspath=/$uuid-ss"
 echo  "开启ws, tls ,四种协议除path外其他参数均相同"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
-echo "clash配置Trojan,vmess"
+echo "clash只能使用trojan和vmess,请勿添加vless,会导致出错.vless需要更换meta核心"
 echo "$config"
 echo "------------------------------------------------------"
 echo "------------------------------------------------------"
 echo "此配置保存在/root/link.conf"
 echo "如果访问伪装页面失败,尝试使用以下命令手动重启ufw及nginx"
 echo "查看工作端口占用:   lsof -i :443"
+echo "杀死占用443的进程"
 echo "重启ufw:    ufw reload"
-echo "重启nginx:  systemctl restart nginx"
+echo "杀死nginx:  pkill -9 nginx"
+echo "启动nginx:  nginx"
+echo "伪装页面可访问,节点不通,尝试重启xray"
 echo "重启xray:   systemctl restart xray"
