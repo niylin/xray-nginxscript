@@ -533,6 +533,7 @@ config="\
     protocol: udp #支持 udp/wechat-video/faketcp
     up: 30
     down: 100
+    sni: direct.$domain_name
   - name: $jiedian_name-vmess
     type: vmess
     server: $domain_name
