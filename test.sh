@@ -60,15 +60,17 @@ if pgrep -x "apache2" >/dev/null || pgrep -x "httpd" >/dev/null || pgrep -x "ngi
     fi
 fi
 
-# 安装必要及常用的软件包
+# 安装必要的软件包
 if [ -f /etc/debian_version ]; then
     apt-get update
-    apt-get install -y curl unzip lsof git ufw nginx jq vim sudo
+    # apt-get install -y curl unzip lsof git ufw nginx jq nano sudo
+    apt-get install -y curl unzip lsof git ufw nginx jq nano sudo || { echo "安装失败: curl unzip ufw nginx jq"; exit 1; }
+
 elif [ -f /etc/redhat-release ]; then
     yum install -y epel-release
     yum clean all
     yum makecache
-    yum install -y curl unzip lsof git ufw nginx jq vim sudo
+    yum install -y curl unzip lsof git ufw nginx jq nano sudo || { echo "安装失败: curl unzip ufw nginx jq"; exit 1; }
 fi
 # 生成节点名
 declare -A flag_map
@@ -297,9 +299,9 @@ while true; do
             curl -fsSL "https://alist.nn.ci/v3.sh" | bash -s install
             sed -i "s|aaaaidddddaa125647|location / {\n        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto \$scheme;\n        proxy_set_header Host \$http_host;\n        proxy_set_header X-Real-IP \$remote_addr;\n        proxy_set_header Range \$http_range;\n        proxy_set_header If-Range \$http_if_range;\n        proxy_redirect off;\n        proxy_pass http://127.0.0.1:5244;\n        client_max_body_size 20000m;\n\t}|" /etc/nginx/conf.d/$domain_name.conf
 # 为alist添加虚拟驱动
-            wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/data.tar.gz -P /opt/alist
-            tar -xzf /opt/alist/data.tar.gz -C /opt/alist/data --strip-components=3 --overwrite
-            systemctl restart alist
+            # wget https://github.com/niylin/xray-nginxscript/releases/download/nhg/data.tar.gz -P /opt/alist
+            # tar -xzf /opt/alist/data.tar.gz -C /opt/alist/data --strip-components=3 --overwrite
+            # systemctl restart alist
             break
             ;;
         *)
