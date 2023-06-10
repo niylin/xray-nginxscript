@@ -9,13 +9,13 @@ read -p "请输入您的 Cloudflare 邮件地址: " email
 # 安装必要的软件包
 if [ -f /etc/debian_version ]; then
     apt-get update
-    apt-get install -y curl unzip ufw wget || { echo "安装失败: curl unzip ufw wget"; exit 1; }
+    apt-get install -y curl ufw wget || { echo "安装失败: curl ufw wget"; exit 1; }
 
 elif [ -f /etc/redhat-release ]; then
     yum install -y epel-release
     yum clean all
     yum makecache
-    yum install -y curl unzip ufw wget || { echo "安装失败: curl unzip ufw wget"; exit 1; }
+    yum install -y curl ufw wget || { echo "安装失败: curl ufw wget"; exit 1; }
 fi
 # 生成节点名
 declare -A flag_map
