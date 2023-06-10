@@ -116,6 +116,9 @@ ufw default allow outgoing
 ufw allow 80/tcp
 ufw allow 443/tcp
 ufw allow 22/tcp
+ufw allow 19999
+ufw allow 20000:30000/tcp
+ufw allow 20000:30000/udp
 yes | ufw enable
 ufw reload
 # 安装wgcf
