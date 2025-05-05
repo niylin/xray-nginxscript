@@ -35,7 +35,6 @@ fi
 
 # 获取用户信息
 read -p "请输入完整域名 例如 example.example.com： " domain_name
-read -p "请输入域名前缀 例如 example： " host_number
 read -p "请为结点命名： " jiedian_name_zd
 read -p "请输入您的 Cloudflare API 密钥: " CF_Key
 read -p "请输入您的 Cloudflare 邮件地址: " CF_Email
@@ -112,7 +111,7 @@ echo 'alias acme.sh=~/.acme.sh/acme.sh' >> ~/.bashrc
 source ~/.bashrc
 
 # 使用 Cloudflare API 请求 SSL 证书
-~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain_name -d "*.$domain_name"
+~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain_name 
 ~/.acme.sh/acme.sh --install-cert -d $domain_name \
     --key-file /opt/cert/$domain_name.key \
     --fullchain-file /opt/cert/$domain_name.crt
@@ -952,4 +951,7 @@ wireguard端口 59000-59999
 hysteria2端口 58000-58999
 EOF
 cat /opt/www/proxy-providers/link.yamml
+
+
+
 
