@@ -8,6 +8,18 @@
   </code></pre>
 </div>
 
+vless+reality
+
+vmess+ws+tls  
+
+Trojan+ws+tls  
+
+hysteria2
+
+wireguard
+
+四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
+
 仅申请证书和解析
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
@@ -24,17 +36,6 @@
 </div>
  
 
-vless+reality
-
-vmess+ws+tls  
-
-Trojan+ws+tls  
-
-hysteria2
-
-wireguard
-
-四个伪装页面 视频页面,文件转换页面,小游戏页面,alist页面  
  
 ### 自动解析  
 通过cloud flare API申请证书,并解析到本地ip,
