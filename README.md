@@ -4,7 +4,7 @@
 <div>
   <button class="btn" data-clipboard-target="#code"></button>
   <pre><code id="code" class="language-python">
-  wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/test.sh && chmod +x test.sh && ./test.sh
+  wget https://raw.githubusercontent.com/niylin/xray-nginxscript/main/sb-nginx.sh && chmod +x test.sh && ./test.sh
   </code></pre>
 </div>
 
